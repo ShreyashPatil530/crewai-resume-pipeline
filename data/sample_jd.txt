@@ -1,0 +1,23 @@
+Job Title: Senior AI Engineer
+Company: TechCorp
+Experience Level: 5+ years
+
+Responsibilities:
+- Design and implement multi-agent LLM systems using CrewAI and LangChain.
+- Build robust and scalable APIs using FastAPI.
+- Optimize prompts and manage LLM integrations (OpenAI, Groq).
+- Collaborate with product teams to gather requirements.
+
+Required Skills:
+- Python
+- LangChain
+- CrewAI
+- FastAPI
+- Docker
+- REST APIs
+- Pydantic
+
+Preferred Skills:
+- Experience with CI/CD
+- Vector Databases (Pinecone, Weaviate)
+- AWS/GCP

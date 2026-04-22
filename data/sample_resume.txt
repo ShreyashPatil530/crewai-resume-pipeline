@@ -1,0 +1,14 @@
+Jane Doe
+Software Developer
+
+Experience:
+- Developed backend systems using Python and Django for an e-commerce platform.
+- Created small automation scripts using OpenAI API to process text data.
+- Built a front-end web app with React and connected it to a Flask backend.
+- Deployed applications on AWS using basic EC2 instances.
+
+Skills:
+- Python, JavaScript
+- Django, Flask
+- HTML, CSS, React
+- Basic Machine Learning
