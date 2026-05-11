@@ -375,4 +375,15 @@ Contributions are welcome! Feel free to open an issue or submit a pull request.
 
 [![GitHub stars](https://img.shields.io/github/stars/ShreyashPatil530/crewai-resume-pipeline?style=social)](https://github.com/ShreyashPatil530/crewai-resume-pipeline)
 
+<br/>
+
+---
+
+### 👨‍💻 Author
+
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=18&duration=3000&pause=1000&color=6E40C9&center=true&vCenter=true&width=400&lines=Shreyash+Patil;AI+%26+ML+Developer;CrewAI+%7C+LLM+%7C+Python" alt="Author" />
+
+[![Portfolio](https://img.shields.io/badge/Portfolio-shreyash--orpin.vercel.app-6E40C9?style=for-the-badge&logo=vercel&logoColor=white)](https://shreyash-orpin.vercel.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-ShreyashPatil530-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ShreyashPatil530)
+
 </div>
