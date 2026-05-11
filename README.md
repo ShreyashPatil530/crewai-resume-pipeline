@@ -32,76 +32,53 @@ This pipeline **fully automates** the resume tailoring process using three speci
 
 ## 🧠 How It Works
 
-### Pipeline Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     CrewAI Resume Pipeline                          │
-│                                                                     │
-│  📄 Input Files                                                     │
-│  ├── data/sample_jd.txt      (Target Job Description)              │
-│  └── data/sample_resume.txt  (Your Current Resume)                 │
-│                                                                     │
-│           │                                                         │
-│           ▼                                                         │
-│  ┌─────────────────────┐                                           │
-│  │  STAGE 1            │                                           │
-│  │  🕵️ Job Analyst     │  ← Extracts: skills, requirements,       │
-│  │  Agent              │    responsibilities, match criteria       │
-│  └────────┬────────────┘                                           │
-│           │  JobAnalysisModel (Pydantic)                           │
-│           ▼                                                         │
-│  ┌─────────────────────┐     ┌──────────────────────┐             │
-│  │  STAGE 2            │◄────│  🔁 Feedback Loop    │             │
-│  │  ✍️ Resume          │     │  (Max 2 retries if   │             │
-│  │  Optimizer Agent    │     │   score < 7/10)      │             │
-│  │  + Custom Tools     │     └──────────────────────┘             │
-│  └────────┬────────────┘                  ▲                       │
-│           │  TailoredResumeModel          │                       │
-│           ▼                               │ NEEDS_REVISION        │
-│  ┌─────────────────────┐                  │                       │
-│  │  STAGE 3            │──────────────────┘                       │
-│  │  ⚖️ QA HR Reviewer  │                                           │
-│  │  Agent              │  → Scores 1-10, APPROVED / NEEDS_REVISION│
-│  └────────┬────────────┘                                           │
-│           │  score ≥ 7 → APPROVED                                  │
-│           ▼                                                         │
-│  📁 output/final_resume.json  ✅                                   │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Mermaid Flow Diagram
+### Pipeline Architecture
 
 ```mermaid
 flowchart TD
-    A[📄 Job Description .txt] --> C
-    B[📝 Candidate Resume .txt] --> D
+    classDef inputFile   fill:#0d1117,stroke:#58a6ff,color:#c9d1d9,stroke-width:2px
+    classDef stage1Node  fill:#1e1b4b,stroke:#a371f7,color:#c4b5fd,stroke-width:2px
+    classDef stage2Node  fill:#052e16,stroke:#3fb950,color:#aff5b4,stroke-width:2px
+    classDef toolNode    fill:#0c1821,stroke:#388bfd,color:#79c0ff,stroke-width:1px,stroke-dasharray:5 5
+    classDef modelNode   fill:#161b22,stroke:#d2a8ff,color:#d2a8ff,stroke-width:1px
+    classDef stage3Node  fill:#2d1515,stroke:#f78166,color:#ffa198,stroke-width:2px
+    classDef decideNode  fill:#3d2b00,stroke:#f0883e,color:#ffa657,stroke-width:2px
+    classDef outputNode  fill:#0d2818,stroke:#56d364,color:#56d364,stroke-width:3px
 
-    subgraph STAGE1 ["🔍 Stage 1 — Job Analysis Crew"]
-        C[🕵️ Senior Job Profile Analyst Agent]
+    JD[/"📄 data/sample_jd.txt\nJob Description"/]:::inputFile
+    RES[/"📝 data/sample_resume.txt\nCandidate Resume"/]:::inputFile
+
+    subgraph S1["🔍  STAGE 1  ——  Job Analysis Crew"]
+        A1["🕵️  Senior Job Profile Analyst\n————————————————————————\nLLM · groq/llama-3.3-70b-versatile\n\nExtracts → job title · required skills\npreferred skills · experience level\nresponsibilities · match criteria"]:::stage1Node
     end
 
-    subgraph STAGE2 ["✍️ Stage 2 — Resume Tailoring Crew"]
-        D[Expert Resume Optimizer Agent]
-        T1[🔧 Keyword Extractor Tool]
-        T2[🔧 Skill Matching Tool]
-        D --> T1
-        D --> T2
+    M1(["📊 JobAnalysisModel\nPydantic · Structured JSON"]):::modelNode
+
+    subgraph S2["✍️  STAGE 2  ——  Resume Tailoring Crew"]
+        A2["🤖  Expert Resume Optimizer\n————————————————————————\nLLM · groq/llama-3.3-70b-versatile\n\nRewrites → professional summary\nskills list · experience bullets\nInjects ATS keywords from JD"]:::stage2Node
+        T1["🔧 Keyword Extractor Tool\nExtracts top 20 keywords from JD"]:::toolNode
+        T2["🔧 Skill Matching Tool\nMatch % · Lists missing skills"]:::toolNode
+        A2 --> T1
+        A2 --> T2
     end
 
-    subgraph STAGE3 ["⚖️ Stage 3 — Quality Review Crew"]
-        E[Strict QA HR Reviewer Agent]
+    M2(["📋 TailoredResumeModel\nPydantic · Structured JSON"]):::modelNode
+
+    subgraph S3["⚖️  STAGE 3  ——  Quality Review Crew"]
+        A3["👔  Strict QA HR Reviewer\n————————————————————————\nLLM · groq/llama-3.3-70b-versatile\n\nOutputs → score 1–10\nkeyword match % · strengths\nimprovements · APPROVED / NEEDS_REVISION"]:::stage3Node
     end
 
-    C -->|JobAnalysisModel| D
-    D -->|TailoredResumeModel| E
-    E -->|score < 7 — NEEDS_REVISION| D
-    E -->|score ≥ 7 — APPROVED ✅| F[📁 output/final_resume.json]
+    DEC{"🔄  Score ≥ 7 / 10 ?\n─────────────────\nVerdict = APPROVED ?"}:::decideNode
 
-    style STAGE1 fill:#1a1a2e,color:#e0e0e0,stroke:#6E40C9
-    style STAGE2 fill:#16213e,color:#e0e0e0,stroke:#FF6B35
-    style STAGE3 fill:#0f3460,color:#e0e0e0,stroke:#00A67E
-    style F fill:#1b5e20,color:#ffffff,stroke:#4caf50
+    OUT[/"✅  output/final_resume.json\n──────────────────────────────\njob_analysis  ·  tailored_resume\nquality_review  ·  score 8/10\nverdict  APPROVED"/]:::outputNode
+
+    JD   --> A1
+    RES  --> A2
+    A1   --> M1 --> A2
+    A2   --> M2 --> A3
+    A3   --> DEC
+    DEC  -- "❌ NEEDS_REVISION\nfeedback injected as prompt\nmax 2 retries" --> A2
+    DEC  -- "✅ APPROVED" --> OUT
 ```
 
 <br/>
